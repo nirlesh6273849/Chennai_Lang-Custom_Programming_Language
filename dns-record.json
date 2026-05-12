@@ -1,0 +1,17 @@
+{
+  "Changes": [
+    {
+      "Action": "UPSERT",
+      "ResourceRecordSet": {
+        "Name": "chennai-lang.nirleshsaravanan.in",
+        "Type": "A",
+        "TTL": 300,
+        "ResourceRecords": [
+          {
+            "Value": "13.127.38.227"
+          }
+        ]
+      }
+    }
+  ]
+}

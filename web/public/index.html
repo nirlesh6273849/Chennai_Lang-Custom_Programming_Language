@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chennai Lang — Online Compiler</title>
+  <meta name="description" content="Write, run, and share Chennai Lang code directly in your browser. An online IDE for the Chennai programming language.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Header -->
+  <header id="app-header">
+    <div class="header-left">
+      <div class="logo-mark">
+        <span class="logo-icon">⟨/⟩</span>
+      </div>
+      <div class="header-titles">
+        <h1>Chennai Lang</h1>
+        <span class="header-subtitle">Online Compiler</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="example-selector" id="example-selector">
+        <label for="example-dropdown">Examples</label>
+        <select id="example-dropdown">
+          <option value="">— Select —</option>
+        </select>
+      </div>
+      <button id="btn-syntax" class="header-btn" title="Syntax Reference">
+        <span class="hbtn-icon">📖</span>
+        <span class="hbtn-label">Syntax</span>
+      </button>
+      <button id="btn-how" class="header-btn" title="How it works">
+        <span class="hbtn-icon">⚙</span>
+        <span class="hbtn-label">How it works</span>
+      </button>
+      <a href="/chennai_lang_onAWS/api/download" class="header-btn download-btn" title="Download Compiler (.exe)">
+        <span class="hbtn-icon">⬇</span>
+        <span class="hbtn-label">Download .exe</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- Toolbar -->
+  <div id="toolbar" class="toolbar">
+    <div class="toolbar-left">
+      <button id="btn-fullscreen" class="tb-btn" title="Toggle Fullscreen">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 6V2h4M10 2h4v4M14 10v4h-4M6 14H2v-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button id="btn-theme" class="tb-btn" title="Toggle Light/Dark Mode">
+        <svg class="icon-sun" width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <svg class="icon-moon" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M14 8.5A6 6 0 017.5 2 6 6 0 1014 8.5z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button id="btn-run" class="tb-btn btn-run" title="Run Code (Ctrl+Enter)">Run</button>
+    </div>
+    <div class="toolbar-center">
+      <span class="toolbar-label">Output</span>
+    </div>
+    <div class="toolbar-right">
+      <span id="exec-time" class="exec-time"></span>
+      <button id="btn-clear-output" class="tb-btn btn-clear" title="Clear Output">Clear</button>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <main id="app-main">
+    <!-- Editor Panel -->
+    <section class="panel panel-editor" id="panel-editor">
+      <div class="panel-header">
+        <div class="panel-tab active">
+          <span class="tab-dot"></span>
+          <span id="file-name">untitled.ch</span>
+        </div>
+        <div class="panel-actions">
+          <button id="btn-clear" class="icon-btn" title="Clear Editor">✕</button>
+        </div>
+      </div>
+      <div id="editor-container"></div>
+    </section>
+
+    <!-- Output Panel -->
+    <section class="panel panel-output" id="panel-output">
+      <div id="output-container">
+        <pre id="output-content" class="output-content"><span class="output-placeholder">Click <strong>Run</strong> or press <strong>Ctrl+Enter</strong> to execute your code.</span></pre>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer id="app-footer">
+    <span>Chennai Lang v1.0 — Built with ❤️ in Chennai</span>
+    <span class="footer-sep">|</span>
+    <span id="status-indicator" class="status-indicator">
+      <span class="status-dot"></span>
+      <span class="status-text">Ready</span>
+    </span>
+  </footer>
+
+  <!-- Syntax Sheet Overlay -->
+  <div id="syntax-overlay" class="modal-overlay"></div>
+  <aside id="syntax-sheet" class="syntax-sheet side-panel">
+    <div class="side-panel-header">
+      <h2>Syntax Reference</h2>
+      <button id="btn-close-syntax" class="icon-btn panel-close" title="Close">✕</button>
+    </div>
+    <div class="syntax-body">
+
+      <div class="syntax-section">
+        <h3>🚀 Program Structure</h3>
+        <pre class="syntax-code"><span class="sk">polamanna</span>        <span class="sc">// program start</span>
+
+<span class="sk">main</span>() {
+    <span class="sc">// your code here</span>
+}
+
+<span class="sk">niruthuanna</span>      <span class="sc">// program end</span></pre>
+      </div>
+
+      <div class="syntax-section">
+        <h3>📦 Data Types</h3>
+        <pre class="syntax-code"><span class="st">int</span> x;           <span class="sc">// integer</span>
+<span class="st">float</span> pi;        <span class="sc">// decimal</span>
+<span class="st">char</span> ch;         <span class="sc">// character</span>
+<span class="st">string</span> name;     <span class="sc">// text</span>
+
+x = 42;
+pi = 3.14;
+ch = <span class="ss">'A'</span>;
+name = <span class="ss">"Chennai"</span>;</pre>
+      </div>
+
+      <div class="syntax-section">
+        <h3>📚 Arrays</h3>
+        <pre class="syntax-code"><span class="st">int[]</span> nums;
+nums[0] = 10;
+nums[1] = 20;
+
+<span class="st">float[]</span> prices;
+prices[0] = 9.99;
+
+<span class="st">char[]</span> letters;
+letters[0] = <span class="ss">'H'</span>;
+letters[1] = <span class="ss">'i'</span>;</pre>
+      </div>
+
+      <div class="syntax-section">
+        <h3>🖨️ Print</h3>
+        <pre class="syntax-code"><span class="ss">"Hello World!"</span> <span class="sk">sollu</span>
+<span class="ss">"x = "</span> + x <span class="sk">sollu</span>
+<span class="ss">"Sum: "</span> + (a + b) <span class="sk">sollu</span></pre>
+      </div>
+
+      <div class="syntax-section">
+        <h3>🔀 Control Flow</h3>
+        <pre class="syntax-code"><span class="sc">// if / elif / else</span>
+<span class="sk">if</span> (x > 10) {
+    <span class="ss">"Big"</span> <span class="sk">sollu</span>
+} <span class="sk">elif</span> (x == 10) {
+    <span class="ss">"Ten"</span> <span class="sk">sollu</span>
+} <span class="sk">else</span> {
+    <span class="ss">"Small"</span> <span class="sk">sollu</span>
+}
+
+<span class="sc">// while loop</span>
+<span class="sk">while</span> (i > 0) {
+    i = i - 1;
+}</pre>
+      </div>
+
+      <div class="syntax-section">
+        <h3>⚡ Functions</h3>
+        <pre class="syntax-code"><span class="sc">// with braces</span>
+add(<span class="st">int</span> a, <span class="st">int</span> b) {
+    <span class="st">int</span> result;
+    result = a + b;
+    <span class="ss">"Sum = "</span> + result <span class="sk">sollu</span>
+}
+
+<span class="sc">// with colon (Python-style)</span>
+greet(<span class="st">string</span> name):
+    <span class="ss">"Hello "</span> + name <span class="sk">sollu</span>
+
+<span class="sc">// calling functions</span>
+add(3, 7);
+greet(<span class="ss">"Chennai"</span>);</pre>
+      </div>
+
+      <div class="syntax-section">
+        <h3>🔧 Block Styles</h3>
+        <pre class="syntax-code"><span class="sc">// Style 1: Braces { }</span>
+<span class="sk">main</span>() {
+    <span class="ss">"Hello"</span> <span class="sk">sollu</span>
+}
+
+<span class="sc">// Style 2: Colon (indent-based)</span>
+<span class="sk">main</span>():
+    <span class="ss">"Hello"</span> <span class="sk">sollu</span></pre>
+      </div>
+
+      <div class="syntax-section">
+        <h3>🎯 Operator Overloading</h3>
+        <pre class="syntax-code"><span class="sk">Op</span>(+) {
+    <span class="sk">operator</span> <span class="so">:=</span> <span class="sk">LHS</span> ^ 2 + <span class="sk">RHS</span>
+}
+
+<span class="sc">// Now a + b computes a² + b</span>
+<span class="st">int</span> result;
+result = 3 + 5;  <span class="sc">// → 9 + 5 = 14</span></pre>
+      </div>
+
+      <div class="syntax-section">
+        <h3>➕ Operators</h3>
+        <table class="syntax-table">
+          <tr><td><code>+</code> <code>-</code> <code>*</code> <code>/</code> <code>%</code></td><td>Arithmetic</td></tr>
+          <tr><td><code>^</code></td><td>Power</td></tr>
+          <tr><td><code>==</code> <code>!=</code></td><td>Equality</td></tr>
+          <tr><td><code>&lt;</code> <code>&gt;</code> <code>&lt;=</code> <code>&gt;=</code></td><td>Comparison</td></tr>
+          <tr><td><code>&&</code> <code>||</code> <code>!</code></td><td>Logical</td></tr>
+          <tr><td><code>=</code></td><td>Assignment</td></tr>
+          <tr><td><code>:=</code></td><td>Op body assign</td></tr>
+        </table>
+      </div>
+
+      <div class="syntax-section">
+        <h3>💬 Comments</h3>
+        <pre class="syntax-code"><span class="sc">// This is a comment</span></pre>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- How It Works Modal -->
+  <div id="how-overlay" class="modal-overlay"></div>
+  <div id="how-modal" class="how-modal">
+    <div class="how-modal-inner">
+      <button id="btn-close-how" class="icon-btn panel-close how-close" title="Close">✕</button>
+      <h2 class="how-title">How Chennai Lang Works</h2>
+
+      <div class="how-text">
+        <p>
+          What if your programming language had <span class="hl-accent">Chennai slang based syntax</span>,
+          supported both <span class="hl-code">{}</span> blocks as in <span class="hl-strong">C, Java</span> and
+          <span class="hl-accent">indentation-based blocks</span> as in <span class="hl-strong">Python</span>,
+          and allowed <span class="hl-accent">operators to be defined with custom behavior</span>?
+        </p>
+        <p>
+          That's why I built a custom programming language featuring
+          <span class="hl-tech">lexical analysis</span>,
+          <span class="hl-tech">recursive descent parsing</span>,
+          <span class="hl-tech">AST generation</span>,
+          <span class="hl-tech">bytecode compilation</span>, and a
+          <span class="hl-tech">stack-based virtual machine</span>.
+          Designed the <span class="hl-strong">compiler pipeline</span>,
+          <span class="hl-strong">runtime behavior</span>, and
+          <span class="hl-strong">execution architecture</span>
+          from scratch in <span class="hl-code">C++</span>, with extensible support planned for
+          <span class="hl-accent">WebAssembly execution</span>.
+        </p>
+      </div>
+
+      <h3 class="how-subtitle">Compiler Pipeline</h3>
+
+      <div class="pipeline-flow">
+        <div class="pipe-stage">
+          <div class="pipe-box">
+            <div class="pipe-icon">📝</div>
+            <div class="pipe-label">Source Code</div>
+            <div class="pipe-desc">.ch files written in Chennai Lang syntax</div>
+          </div>
+          <div class="pipe-arrow">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 4v16m0 0l-6-6m6 6l6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        </div>
+
+        <div class="pipe-stage">
+          <div class="pipe-box">
+            <div class="pipe-icon">🔤</div>
+            <div class="pipe-label">Lexer <span class="pipe-aka">(Tokenizer)</span></div>
+            <div class="pipe-desc">Breaks source into tokens: keywords, literals, operators, identifiers</div>
+          </div>
+          <div class="pipe-arrow">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 4v16m0 0l-6-6m6 6l6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        </div>
+
+        <div class="pipe-stage">
+          <div class="pipe-box">
+            <div class="pipe-icon">🌳</div>
+            <div class="pipe-label">Parser <span class="pipe-aka">(Recursive Descent)</span></div>
+            <div class="pipe-desc">Validates grammar, builds structured representation from token stream</div>
+          </div>
+          <div class="pipe-arrow">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 4v16m0 0l-6-6m6 6l6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        </div>
+
+        <div class="pipe-stage">
+          <div class="pipe-box">
+            <div class="pipe-icon">🏗️</div>
+            <div class="pipe-label">AST <span class="pipe-aka">(Abstract Syntax Tree)</span></div>
+            <div class="pipe-desc">Tree representation of program structure: expressions, statements, functions</div>
+          </div>
+          <div class="pipe-arrow">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 4v16m0 0l-6-6m6 6l6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        </div>
+
+        <div class="pipe-stage">
+          <div class="pipe-box">
+            <div class="pipe-icon">🔧</div>
+            <div class="pipe-label">Intermediate Repr. <span class="pipe-aka">(IR)</span></div>
+            <div class="pipe-desc">Platform-independent bytecode instructions for the virtual machine</div>
+          </div>
+          <div class="pipe-arrow">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 4v16m0 0l-6-6m6 6l6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        </div>
+
+        <div class="pipe-stage">
+          <div class="pipe-box">
+            <div class="pipe-icon">⚡</div>
+            <div class="pipe-label">Optimizer</div>
+            <div class="pipe-desc">Constant folding, dead code elimination, expression simplification</div>
+          </div>
+          <div class="pipe-arrow">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 4v16m0 0l-6-6m6 6l6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        </div>
+
+        <div class="pipe-stage">
+          <div class="pipe-box pipe-box-final">
+            <div class="pipe-icon">💻</div>
+            <div class="pipe-label">Machine Code <span class="pipe-aka">(Execution)</span></div>
+            <div class="pipe-desc">Stack-based VM executes bytecode, manages memory, produces output</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Monaco Editor from CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
