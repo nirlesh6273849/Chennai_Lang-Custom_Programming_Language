@@ -82,9 +82,9 @@ struct Token {
   int line;
   int col;
 
-  Token() : type(TokenType::TOK_EOF), line(0), col(0) {}
+  Token() : type(TokenType::TOK_EOF), line(0), col(0) {} //if default is used, EOF is set
   Token(TokenType t, const std::string &lex, int ln, int c)
-      : type(t), lexeme(lex), line(ln), col(c) {}
+      : type(t), lexeme(lex), line(ln), col(c) {} //else token is created with the given values
 };
 
 // ============================================================================

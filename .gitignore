@@ -1,0 +1,27 @@
+# Build output
+build/
+*.obj
+*.o
+*.exe
+!chennai_lang.exe
+
+# Generated files
+*_tokens.json
+*.asm
+
+# Java compiled classes (in build dir)
+*.class
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Keys (should not be in repo)
+*.pem

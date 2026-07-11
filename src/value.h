@@ -4,11 +4,9 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
-
-
-// ============================================================================
-// Runtime Value — tagged union for all Chennai Lang types
-// ============================================================================
+//This file is a header file only
+//It contains the Value class
+// Used to convert string to int/float/char/string
 
 enum class ValueType {
   INT,

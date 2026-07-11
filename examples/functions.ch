@@ -3,11 +3,11 @@
 
 polamanna
 
-add(int a, int b):
+add(int a, int b){
     int result;
     result = a + b;
     "  add(" + a + ", " + b + ") = " + result sollu
-
+}
 
 factorial_iter(int n) {
     int result;
