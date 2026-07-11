@@ -3,11 +3,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <unordered_map>
-
-// ============================================================================
-// TokenType string → enum mapping
-// ============================================================================
-
+  // TokenType string → enum mapping
 static const std::unordered_map<std::string, TokenType> tokenTypeMap = {
     {"TOK_POLAMANNA", TokenType::TOK_POLAMANNA},
     {"TOK_NIRUTHUANNA", TokenType::TOK_NIRUTHUANNA},
@@ -62,11 +58,7 @@ static const std::unordered_map<std::string, TokenType> tokenTypeMap = {
     {"TOK_NEWLINE", TokenType::TOK_NEWLINE},
     {"TOK_EOF", TokenType::TOK_EOF},
 };
-
-// ============================================================================
-// JSON parsing helpers (minimal, no dependencies)
-// ============================================================================
-
+  // JSON parsing helpers (minimal, no dependencies)
 void TokenReader::skipWs(const std::string &s, size_t &pos) {
   while (pos < s.size() &&
          (s[pos] == ' ' || s[pos] == '\t' || s[pos] == '\n' ||
@@ -156,11 +148,7 @@ TokenType TokenReader::stringToTokenType(const std::string &name) {
     return it->second;
   throw std::runtime_error("Unknown token type: " + name);
 }
-
-// ============================================================================
-// Parse JSON token array
-// ============================================================================
-
+  // Parse JSON token array
 std::vector<Token> TokenReader::readFromString(const std::string &json) {
   std::vector<Token> tokens;
   size_t pos = 0;

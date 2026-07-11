@@ -5,38 +5,21 @@
 #include <string>
 
 #include "codegen.h"
-#include "interpreter.h"
-#include "lexer.h"
 #include "parser.h"
 #include "token_reader.h"
 
-// ============================================================================
-// Usage
-// ============================================================================
-
+// Prints the command line usage instructions
 static void printUsage() {
-  std::cerr << "Chennai Lang Compiler v2.0 (Java + C++ Hybrid)\n";
-  std::cerr << "================================================\n\n";
+  std::cerr << "Chennai Lang Compiler v2.0 (Java + C++ Hybrid)\n\n";
   std::cerr << "Usage:\n";
-  std::cerr << "  chennai_lang <filename.ch>                  "
-               " Compile (lex with C++ fallback + compile to NASM)\n";
-  std::cerr << "  chennai_lang --compile <filename.ch>        "
-               " Compile to NASM assembly + assemble + link\n";
-  std::cerr << "  chennai_lang --compile <filename.ch> -o out "
-               " Compile with custom output name\n";
-  std::cerr << "  chennai_lang --interpret <filename.ch>      "
-               " Interpret (legacy mode)\n";
-  std::cerr << "  chennai_lang --asm-only <filename.ch>       "
-               " Generate .asm file only (no assemble/link)\n";
-  std::cerr << "  chennai_lang --tokens <tokens.json>         "
-               " Compile from Java lexer JSON token file\n";
-  std::cerr << "\n";
+  std::cerr << "  chennai_lang <filename.ch>                  Compile to executable\n";
+  std::cerr << "  chennai_lang --compile <filename.ch>        Compile to executable\n";
+  std::cerr << "  chennai_lang --compile <filename.ch> -o out Compile with custom output name\n";
+  std::cerr << "  chennai_lang --asm-only <filename.ch>       Generate .asm file only (no assemble/link)\n";
+  std::cerr << "  chennai_lang --tokens <tokens.json>         Compile from pre-generated JSON token file\n\n";
 }
 
-// ============================================================================
-// Read source file helper
-// ============================================================================
-
+// Reads the entire contents of a file into a string
 static std::string readFile(const std::string &path) {
   std::ifstream file(path);
   if (!file.is_open()) {
@@ -48,10 +31,7 @@ static std::string readFile(const std::string &path) {
   return buf.str();
 }
 
-// ============================================================================
-// Write output file helper
-// ============================================================================
-
+// Writes a string to a file
 static void writeFile(const std::string &path, const std::string &content) {
   std::ofstream file(path);
   if (!file.is_open()) {
@@ -61,18 +41,13 @@ static void writeFile(const std::string &path, const std::string &content) {
   file << content;
 }
 
-// ============================================================================
-// Derive output filename from input
-// ============================================================================
-
+// Extracts the base name from a file path
 static std::string deriveBaseName(const std::string &path) {
-  // Remove directory
   std::string name = path;
   size_t lastSlash = name.find_last_of("/\\");
   if (lastSlash != std::string::npos) {
     name = name.substr(lastSlash + 1);
   }
-  // Remove extension
   size_t dot = name.find_last_of('.');
   if (dot != std::string::npos) {
     name = name.substr(0, dot);
@@ -80,23 +55,17 @@ static std::string deriveBaseName(const std::string &path) {
   return name;
 }
 
-// ============================================================================
-// Compilation pipeline
-// ============================================================================
-
+// Executes the compilation pipeline: Parse -> CodeGen -> NASM -> Link
 static int compilePipeline(std::vector<Token> &tokens,
                            const std::string &inputFile,
                            const std::string &outputName, bool asmOnly) {
-  // Parse
   Parser parser(tokens);
   auto program = parser.parseProgram();
 
-  // Generate NASM assembly
   CodeGenerator codegen;
   std::string asmCode = codegen.generate(*program);
 
-  std::string baseName =
-      outputName.empty() ? deriveBaseName(inputFile) : outputName;
+  std::string baseName = outputName.empty() ? deriveBaseName(inputFile) : outputName;
   std::string asmFile = baseName + ".asm";
 
   writeFile(asmFile, asmCode);
@@ -106,39 +75,29 @@ static int compilePipeline(std::vector<Token> &tokens,
     return 0;
   }
 
-  // Assemble with NASM
   std::string objFile = baseName + ".obj";
-  std::string nasmCmd =
-      "nasm -f win64 \"" + asmFile + "\" -o \"" + objFile + "\"";
+  std::string nasmCmd = "nasm -f win64 \"" + asmFile + "\" -o \"" + objFile + "\"";
   std::cout << "[Chennai Lang] Assembling: " << nasmCmd << "\n";
   int nasmResult = system(nasmCmd.c_str());
   if (nasmResult != 0) {
-    std::cerr << "Error: NASM assembly failed (exit code " << nasmResult
-              << ")\n";
+    std::cerr << "Error: NASM assembly failed (exit code " << nasmResult << ")\n";
     std::cerr << "       Make sure NASM is installed and on your PATH.\n";
     return 1;
   }
 
-  // Link with GCC (MinGW)
   std::string exeFile = baseName + ".exe";
-  std::string linkCmd =
-      "gcc \"" + objFile + "\" -o \"" + exeFile + "\" -lmsvcrt";
+  std::string linkCmd = "gcc \"" + objFile + "\" -o \"" + exeFile + "\" -lmsvcrt";
   std::cout << "[Chennai Lang] Linking: " << linkCmd << "\n";
   int linkResult = system(linkCmd.c_str());
   if (linkResult != 0) {
     std::cerr << "Error: Linking failed (exit code " << linkResult << ")\n";
-    std::cerr
-        << "       Make sure GCC (MinGW-w64) is installed and on your PATH.\n";
+    std::cerr << "       Make sure GCC (MinGW-w64) is installed and on your PATH.\n";
     return 1;
   }
 
   std::cout << "[Chennai Lang] Successfully compiled: " << exeFile << "\n";
   return 0;
 }
-
-// ============================================================================
-// Main entry point
-// ============================================================================
 
 int main(int argc, char *argv[]) {
   if (argc < 2) {
@@ -150,14 +109,12 @@ int main(int argc, char *argv[]) {
   std::string inputFile = "";
   std::string outputName = "";
 
-  // Parse command-line arguments
   for (int i = 1; i < argc; i++) {
     std::string arg = argv[i];
     if (arg == "--help" || arg == "-h") {
       printUsage();
       return 0;
-    } else if (arg == "--compile" || arg == "--interpret" ||
-               arg == "--asm-only" || arg == "--tokens") {
+    } else if (arg == "--compile" || arg == "--asm-only" || arg == "--tokens") {
       mode = arg;
     } else if (arg == "-o" && i + 1 < argc) {
       outputName = argv[++i];
@@ -173,68 +130,27 @@ int main(int argc, char *argv[]) {
   }
 
   try {
-    // ── Mode: Interpret (legacy) ──────────────────────────────────────────
-    if (mode == "--interpret") {
-      std::string source = readFile(inputFile);
-      Lexer lexer(source);
-      auto tokens = lexer.tokenize();
-      Parser parser(tokens);
-      auto program = parser.parseProgram();
-      Interpreter interpreter;
-      interpreter.run(*program);
-      return 0;
-    }
-
-    // ── Mode: Compile from JSON tokens (from Java lexer) ──────────────────
     if (mode == "--tokens") {
       auto tokens = TokenReader::readFromFile(inputFile);
       return compilePipeline(tokens, inputFile, outputName, false);
     }
 
-    // ── Mode: ASM only ────────────────────────────────────────────────────
-    if (mode == "--asm-only") {
-      std::string source = readFile(inputFile);
-      Lexer lexer(source);
-      auto tokens = lexer.tokenize();
-      return compilePipeline(tokens, inputFile, outputName, true);
+    std::string baseName = deriveBaseName(inputFile);
+    std::string tokensFile = baseName + "_tokens.json";
+
+    std::string javaCmd = "java -cp build/java com.chennai.lexer.ChennaiLexer \"" +
+                          inputFile + "\" > \"" + tokensFile + "\" 2>NUL";
+    int javaResult = system(javaCmd.c_str());
+
+    if (javaResult != 0) {
+      std::cerr << "Error: Java lexer failed to run. Ensure Java is installed and the lexer is compiled.\n";
+      return 1;
     }
 
-    // ── Mode: Full compile (default) ──────────────────────────────────────
-    // Try to use Java lexer first, fall back to C++ lexer
-    {
-      std::string baseName = deriveBaseName(inputFile);
-      std::string tokensFile = baseName + "_tokens.json";
-      bool usedJavaLexer = false;
+    std::vector<Token> tokens = TokenReader::readFromFile(tokensFile);
+    std::cout << "[Chennai Lang] Lexer: Java (JSON bridge)\n";
 
-      // Attempt Java lexer
-      std::string javaCmd = "java -cp build/java com.chennai.lexer.ChennaiLexer \"" +
-                            inputFile + "\" > \"" + tokensFile + "\" 2>NUL";
-      int javaResult = system(javaCmd.c_str());
-
-      std::vector<Token> tokens;
-
-      if (javaResult == 0) {
-        // Try to read Java lexer output
-        try {
-          tokens = TokenReader::readFromFile(tokensFile);
-          usedJavaLexer = true;
-          std::cout << "[Chennai Lang] Lexer: Java (JSON bridge)\n";
-        } catch (...) {
-          // Fall through to C++ lexer
-        }
-      }
-
-      if (!usedJavaLexer) {
-        // Fall back to C++ lexer
-        std::string source = readFile(inputFile);
-        Lexer lexer(source);
-        tokens = lexer.tokenize();
-        std::cout << "[Chennai Lang] Lexer: C++ (native fallback)\n";
-      }
-
-      return compilePipeline(tokens, inputFile, outputName,
-                             mode == "--asm-only");
-    }
+    return compilePipeline(tokens, inputFile, outputName, mode == "--asm-only");
 
   } catch (const std::exception &e) {
     std::cerr << "Error: " << e.what() << std::endl;

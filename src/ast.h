@@ -1,14 +1,9 @@
 #pragma once
-#include "lexer.h"
+#include "token.h"
 #include <memory>
 #include <string>
 #include <vector>
-
-
-// ============================================================================
-// AST Node base classes
-// ============================================================================
-
+  // AST Node base classes
 struct ASTNode {
   virtual ~ASTNode() = default;
 };
@@ -18,11 +13,7 @@ struct Stmt : ASTNode {};
 
 using ExprPtr = std::unique_ptr<Expr>;
 using StmtPtr = std::unique_ptr<Stmt>;
-
-// ============================================================================
-// Expression nodes
-// ============================================================================
-
+  // Expression nodes
 struct NumberExpr : Expr {
   int value;
   explicit NumberExpr(int v) : value(v) {}
@@ -82,11 +73,7 @@ struct AssignExpr : Expr {
   ExprPtr value;
   AssignExpr(const std::string &n, ExprPtr v) : name(n), value(std::move(v)) {}
 };
-
-// ============================================================================
-// Statement nodes
-// ============================================================================
-
+  // Statement nodes
 struct BlockStmt : Stmt {
   std::vector<StmtPtr> statements;
   explicit BlockStmt(std::vector<StmtPtr> stmts)
@@ -156,24 +143,16 @@ struct ReturnStmt : Stmt {
   ExprPtr value; // may be nullptr
   explicit ReturnStmt(ExprPtr v = nullptr) : value(std::move(v)) {}
 };
-
-// ============================================================================
-// Operator overload AST: stores the override expression tree
-// ============================================================================
-
-// Represents the operator override definition body
-// e.g. Op(+) { operator := LHS ^ 2 + RHS }
-// The OExpression is stored as a regular Expr tree, but uses special
-// IdentifierExpr("__LHS__") and IdentifierExpr("__RHS__") placeholders
+  // Operator overload AST: stores the override expression tree
+  // Represents the operator override definition body
+  // e.g. Op(+) { operator := LHS ^ 2 + RHS }
+  // The OExpression is stored as a regular Expr tree, but uses special
+  // IdentifierExpr("__LHS__") and IdentifierExpr("__RHS__") placeholders
 struct OperatorOverload {
   std::string op; // the operator being overloaded, e.g. "+"
   ExprPtr body;   // the replacement expression
 };
-
-// ============================================================================
-// Function definition
-// ============================================================================
-
+  // Function definition
 struct FunctionDef {
   std::string name; // function name or "main"
   std::vector<std::pair<std::string, std::string>> params; // (type, name) pairs
@@ -184,11 +163,7 @@ struct FunctionDef {
               std::unique_ptr<BlockStmt> body_)
       : name(name_), params(std::move(params_)), body(std::move(body_)) {}
 };
-
-// ============================================================================
-// Program — top level
-// ============================================================================
-
+  // Program — top level
 struct Program {
   std::vector<OperatorOverload> operators;
   std::vector<std::unique_ptr<FunctionDef>> functions;

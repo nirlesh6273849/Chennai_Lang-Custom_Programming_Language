@@ -1,18 +1,9 @@
 #include "parser.h"
 #include <iostream>
 #include <stdexcept>
-
-
-// ============================================================================
-// Constructor
-// ============================================================================
-
+  // Constructor
 Parser::Parser(const std::vector<Token> &toks) : tokens(toks), pos(0) {}
-
-// ============================================================================
-// Helpers
-// ============================================================================
-
+  // Helpers
 const Token &Parser::current() const { return tokens[pos]; }
 
 const Token &Parser::peek() const {
@@ -61,11 +52,7 @@ std::string Parser::parseType() {
   Token tok = advance();
   return tok.lexeme;
 }
-
-// ============================================================================
-// Top level:  P = polamanna FunctionOperatorList niruthuanna
-// ============================================================================
-
+  // Top level:  P = polamanna FunctionOperatorList niruthuanna
 std::unique_ptr<Program> Parser::parseProgram() {
   auto prog = std::make_unique<Program>();
 
@@ -83,11 +70,7 @@ std::unique_ptr<Program> Parser::parseProgram() {
   expect(TokenType::TOK_NIRUTHUANNA, "Expected 'niruthuanna'");
   return prog;
 }
-
-// ============================================================================
-// Operator overloading:  Op ( operator ) { operator := OExpression }
-// ============================================================================
-
+  // Operator overloading:  Op ( operator ) { operator := OExpression }
 OperatorOverload Parser::parseOperatorOverload() {
   OperatorOverload ov;
   expect(TokenType::TOK_OP, "Expected 'Op'");
@@ -113,8 +96,8 @@ OperatorOverload Parser::parseOperatorOverload() {
   return ov;
 }
 
-// Parse the OExpression inside operator override blocks
-// LHS and RHS are turned into special identifiers __LHS__ and __RHS__
+  // Parse the OExpression inside operator override blocks
+  // LHS and RHS are turned into special identifiers __LHS__ and __RHS__
 ExprPtr Parser::parseOExpression(const std::string &op) {
   // We reuse the normal expression parser, but LHS/RHS tokens become
   // special identifiers that the interpreter will substitute.
@@ -123,12 +106,8 @@ ExprPtr Parser::parseOExpression(const std::string &op) {
   // We just need to parse a full expression here.
   return parseExpression();
 }
-
-// ============================================================================
-// Function:   Identifier ( ParameterList ) Block
-//          |  main ( ) Block
-// ============================================================================
-
+  // Function:   Identifier ( ParameterList ) Block
+  //          |  main ( ) Block
 std::unique_ptr<FunctionDef> Parser::parseFunction() {
   std::string name;
 
@@ -163,11 +142,7 @@ std::unique_ptr<FunctionDef> Parser::parseFunction() {
   return std::make_unique<FunctionDef>(name, std::move(params),
                                        std::move(body));
 }
-
-// ============================================================================
-// Block:  { StatementList }  or  : IndentedStatementList
-// ============================================================================
-
+  // Block:  { StatementList }  or  : IndentedStatementList
 std::unique_ptr<BlockStmt> Parser::parseBlock() {
   if (check(TokenType::TOK_LBRACE)) {
     // Brace-delimited block: { ... }
@@ -212,11 +187,7 @@ std::unique_ptr<BlockStmt> Parser::parseIndentedBlock() {
 
   return std::make_unique<BlockStmt>(std::move(stmts));
 }
-
-// ============================================================================
-// Statement dispatcher
-// ============================================================================
-
+  // Statement dispatcher
 StmtPtr Parser::parseStatement() {
   // Declaration or DeclarationAssignment: starts with a type keyword
   if (isTypeToken()) {
@@ -279,13 +250,9 @@ StmtPtr Parser::parseStatement() {
   error("Unexpected token '" + current().lexeme + "' at line " +
         std::to_string(current().line));
 }
-
-// ============================================================================
-// Declaration / DeclAssignment
-//   Type Identifier ;
-//   Type Identifier = expression ;
-// ============================================================================
-
+  // Declaration / DeclAssignment
+  //   Type Identifier ;
+  //   Type Identifier = expression ;
 StmtPtr Parser::parseDeclarationOrAssignment() {
   std::string typeName = parseType();
   Token nameTok = expect(TokenType::TOK_IDENTIFIER, "Expected variable name");
@@ -300,11 +267,7 @@ StmtPtr Parser::parseDeclarationOrAssignment() {
   return std::make_unique<DeclAssignStmt>(typeName, nameTok.lexeme,
                                           std::move(val));
 }
-
-// ============================================================================
-// If / elif / else
-// ============================================================================
-
+  // If / elif / else
 StmtPtr Parser::parseIfStatement() {
   expect(TokenType::TOK_IF, "Expected 'if'");
   expect(TokenType::TOK_LPAREN, "Expected '('");
@@ -331,11 +294,7 @@ StmtPtr Parser::parseIfStatement() {
   return std::make_unique<IfStmt>(std::move(cond), std::move(thenBlock),
                                   std::move(elifs), std::move(elseBlock));
 }
-
-// ============================================================================
-// While
-// ============================================================================
-
+  // While
 StmtPtr Parser::parseWhileStatement() {
   expect(TokenType::TOK_WHILE, "Expected 'while'");
   expect(TokenType::TOK_LPAREN, "Expected '('");
@@ -344,11 +303,7 @@ StmtPtr Parser::parseWhileStatement() {
   auto body = parseBlock();
   return std::make_unique<WhileStmt>(std::move(cond), std::move(body));
 }
-
-// ============================================================================
-// Print:  "string" + Print   |   "string" sollu
-// ============================================================================
-
+  // Print:  "string" + Print   |   "string" sollu
 StmtPtr Parser::parsePrintStatement() {
   std::vector<ExprPtr> parts;
 
@@ -356,8 +311,8 @@ StmtPtr Parser::parsePrintStatement() {
   auto first = parseExpression();
   parts.push_back(std::move(first));
 
-  // Check for + (concatenation) or sollu (terminate print)
-  while (match(TokenType::TOK_PLUS)) {
+  // Check for , (concatenation) or sollu (terminate print)
+  while (match(TokenType::TOK_COMMA)) {
     // Next part
     auto next = parseExpression();
     parts.push_back(std::move(next));
@@ -369,14 +324,10 @@ StmtPtr Parser::parsePrintStatement() {
 
   return std::make_unique<PrintStmt>(std::move(parts));
 }
-
-// ============================================================================
-// Expressions — precedence climbing
-// ============================================================================
-
+  // Expressions — precedence climbing
 ExprPtr Parser::parseExpression() { return parseAssignmentExpr(); }
 
-// assignment_expr = Identifier = assignment_expr | logical_expr
+  // assignment_expr = Identifier = assignment_expr | logical_expr
 ExprPtr Parser::parseAssignmentExpr() {
   // Try logical_expr first; if it's an identifier followed by =, treat as
   // assignment
@@ -387,7 +338,7 @@ ExprPtr Parser::parseAssignmentExpr() {
   return expr;
 }
 
-// logical_expr = relational_expr ((&& | ||) relational_expr)*
+  // logical_expr = relational_expr ((&& | ||) relational_expr)*
 ExprPtr Parser::parseLogicalExpr() {
   auto left = parseRelationalExpr();
 
@@ -399,7 +350,7 @@ ExprPtr Parser::parseLogicalExpr() {
   return left;
 }
 
-// relational_expr = additive_expr ((< | > | <= | >= | == | !=) additive_expr)*
+  // relational_expr = additive_expr ((< | > | <= | >= | == | !=) additive_expr)*
 ExprPtr Parser::parseRelationalExpr() {
   auto left = parseAdditiveExpr();
 
@@ -413,7 +364,7 @@ ExprPtr Parser::parseRelationalExpr() {
   return left;
 }
 
-// additive_expr = multiplicative_expr ((+ | -) multiplicative_expr)*
+  // additive_expr = multiplicative_expr ((+ | -) multiplicative_expr)*
 ExprPtr Parser::parseAdditiveExpr() {
   auto left = parseMultiplicativeExpr();
 
@@ -425,7 +376,7 @@ ExprPtr Parser::parseAdditiveExpr() {
   return left;
 }
 
-// multiplicative_expr = unary_expr ((* | / | %) unary_expr)*
+  // multiplicative_expr = unary_expr ((* | / | %) unary_expr)*
 ExprPtr Parser::parseMultiplicativeExpr() {
   auto left = parsePowerExpr();
 
@@ -438,7 +389,7 @@ ExprPtr Parser::parseMultiplicativeExpr() {
   return left;
 }
 
-// power_expr = unary_expr (^ unary_expr)*
+  // power_expr = unary_expr (^ unary_expr)*
 ExprPtr Parser::parsePowerExpr() {
   auto left = parseUnaryExpr();
 
@@ -450,7 +401,7 @@ ExprPtr Parser::parsePowerExpr() {
   return left;
 }
 
-// unary_expr = (! | -) unary_expr | primary
+  // unary_expr = (! | -) unary_expr | primary
 ExprPtr Parser::parseUnaryExpr() {
   if (check(TokenType::TOK_BANG) || check(TokenType::TOK_MINUS)) {
     std::string op = advance().lexeme;
@@ -460,13 +411,13 @@ ExprPtr Parser::parseUnaryExpr() {
   return parsePrimary();
 }
 
-// primary = Number | Float | Character | String
-//         | Identifier
-//         | Identifier [ expression ]
-//         | Functioncall               (Identifier ( ArgumentList ))
-//         | ( expression )
-//         | LHS  (special, for operator overload bodies)
-//         | RHS  (special, for operator overload bodies)
+  // primary = Number | Float | Character | String
+  //         | Identifier
+  //         | Identifier [ expression ]
+  //         | Functioncall               (Identifier ( ArgumentList ))
+  //         | ( expression )
+  //         | LHS  (special, for operator overload bodies)
+  //         | RHS  (special, for operator overload bodies)
 ExprPtr Parser::parsePrimary() {
   // LHS / RHS — special tokens used inside operator overload bodies
   if (check(TokenType::TOK_LHS)) {
@@ -536,11 +487,7 @@ ExprPtr Parser::parsePrimary() {
   error("Unexpected token '" + current().lexeme + "' in expression at line " +
         std::to_string(current().line));
 }
-
-// ============================================================================
-// Argument list for function calls
-// ============================================================================
-
+  // Argument list for function calls
 std::vector<ExprPtr> Parser::parseArgumentList() {
   std::vector<ExprPtr> args;
   if (check(TokenType::TOK_RPAREN))

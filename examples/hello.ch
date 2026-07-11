@@ -12,8 +12,8 @@ main() {
     sum = x + y;
 
     "Hello from Chennai Lang!" sollu
-    "x = " + x + ", y = " + y sollu
-    "Sum = " + sum sollu
+    "x = ", x, ", y = ", y sollu
+    "Sum = ", sum sollu
 
     if (sum > 25) {
         "Sum is greater than 25" sollu
@@ -27,7 +27,7 @@ main() {
     int i;
     i = 5;
     while (i > 0) {
-        "Countdown: " + i sollu
+        "Countdown: ", i sollu
         i = i - 1;
     }
     "Blast off!" sollu

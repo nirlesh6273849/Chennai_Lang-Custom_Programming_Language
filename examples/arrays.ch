@@ -13,11 +13,11 @@ main() {
     nums[4] = 50;
 
     "=== Integer Array ===" sollu
-    "nums[0] = " + nums[0] sollu
-    "nums[1] = " + nums[1] sollu
-    "nums[2] = " + nums[2] sollu
-    "nums[3] = " + nums[3] sollu
-    "nums[4] = " + nums[4] sollu
+    "nums[0] = ", nums[0] sollu
+    "nums[1] = ", nums[1] sollu
+    "nums[2] = ", nums[2] sollu
+    "nums[3] = ", nums[3] sollu
+    "nums[4] = ", nums[4] sollu
 
     // Sum the array
     int sum;
@@ -28,7 +28,7 @@ main() {
         sum = sum + nums[i];
         i = i + 1;
     }
-    "Sum of nums = " + sum sollu
+    "Sum of nums = ", sum sollu
 
     // Float array
     float[] prices;
@@ -37,9 +37,9 @@ main() {
     prices[2] = 4.75;
 
     "=== Float Array ===" sollu
-    "prices[0] = " + prices[0] sollu
-    "prices[1] = " + prices[1] sollu
-    "prices[2] = " + prices[2] sollu
+    "prices[0] = ", prices[0] sollu
+    "prices[1] = ", prices[1] sollu
+    "prices[2] = ", prices[2] sollu
 
     // Char array
     char[] letters;
@@ -48,7 +48,7 @@ main() {
     letters[2] = '!';
 
     "=== Char Array ===" sollu
-    "letters = " + letters sollu
+    "letters = ", letters sollu
 }
 
 niruthuanna

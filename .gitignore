@@ -25,3 +25,8 @@ Thumbs.db
 
 # Keys (should not be in repo)
 *.pem
+
+# Temp files
+fix.py
+nasm.zip
+nasm_dir/

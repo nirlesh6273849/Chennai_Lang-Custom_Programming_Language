@@ -6,7 +6,7 @@ polamanna
 add(int a, int b){
     int result;
     result = a + b;
-    "  add(" + a + ", " + b + ") = " + result sollu
+    "  add(", a, ", ", b, ") = ", result sollu
 }
 
 factorial_iter(int n) {
@@ -18,11 +18,11 @@ factorial_iter(int n) {
         result = result * i;
         i = i + 1;
     }
-    "  factorial(" + n + ") = " + result sollu
+    "  factorial(", n, ") = ", result sollu
 }
 
 greet(string name) {
-    "  Hello, " + name + "!" sollu
+    "  Hello, ", name, "!" sollu
 }
 
 main() {

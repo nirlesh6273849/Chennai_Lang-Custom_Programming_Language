@@ -1,24 +1,17 @@
 @echo off
-REM ============================================================================
 REM Chennai Lang — Build Script
+set "PATH=C:\Users\nirle\Downloads\nasm-2.16.03-win64\nasm-2.16.03;C:\Users\nirle\Downloads\w64devkit\bin;%PATH%"
 REM Builds both the Java Lexer and the C++ Compiler
-REM ============================================================================
 
-echo ================================================
-echo  Chennai Lang Compiler — Build System
-echo ================================================
-echo.
+echo Building Chennai Lang Compiler
 
-REM --------------------------------------------------------------------------
 REM Step 1: Build Java Lexer
-REM --------------------------------------------------------------------------
 echo [1/2] Building Java Lexer...
 
 where javac >NUL 2>NUL
 if %ERRORLEVEL% neq 0 (
-    echo [WARN] javac not found on PATH. Skipping Java Lexer build.
-    echo        The compiler will use the C++ lexer as fallback.
-    goto cpp_build
+    echo [ERROR] javac not found on PATH. The Java Lexer is strictly required.
+    exit /b 1
 )
 
 if not exist "build\java" mkdir "build\java"
@@ -35,41 +28,24 @@ if %ERRORLEVEL% neq 0 (
 echo [OK] Java Lexer built successfully.
 echo.
 
-REM --------------------------------------------------------------------------
 REM Step 2: Build C++ Compiler
-REM --------------------------------------------------------------------------
-:cpp_build
 echo [2/2] Building C++ Compiler...
 
 if not exist "build" mkdir "build"
 
-pushd build
-cmake .. -G "MinGW Makefiles" 2>NUL || cmake .. 2>NUL
-if %ERRORLEVEL% neq 0 (
-    echo [ERROR] CMake configuration failed!
-    echo        Make sure CMake and a C++ compiler are installed.
-    popd
-    exit /b 1
-)
-
-cmake --build . --config Release
+g++ -O2 -std=c++17 -I src src\main.cpp src\parser.cpp src\codegen.cpp src\token_reader.cpp -o build\chennai_lang.exe
 if %ERRORLEVEL% neq 0 (
     echo [ERROR] C++ build failed!
-    popd
     exit /b 1
 )
-popd
 
 echo.
-echo ================================================
-echo  Build Complete!
-echo ================================================
+echo Build Complete!
 echo.
-echo  C++ Compiler:  build\chennai_lang.exe
-echo  Java Lexer:    build\java\com\chennai\lexer\
+echo C++ Compiler:  build\chennai_lang.exe
+echo Java Lexer:    build\java\com\chennai\lexer\
 echo.
-echo  Usage:
-echo    chennai.bat ^<file.ch^>         Compile and run
-echo    chennai.bat --asm ^<file.ch^>   Generate ASM only
-echo    chennai.bat --interp ^<file.ch^> Interpret (legacy)
+echo Usage:
+echo   chennai.bat ^<file.ch^>         Compile and run
+echo   chennai.bat --asm ^<file.ch^>   Generate ASM only
 echo.

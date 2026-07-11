@@ -4,26 +4,17 @@ project(chennai_lang LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# ============================================================================
 # Chennai Lang Compiler (Java + C++ Hybrid)
-# ============================================================================
-
 add_executable(chennai_lang
     src/main.cpp
-    src/lexer.cpp
     src/parser.cpp
-    src/interpreter.cpp
     src/codegen.cpp
     src/token_reader.cpp
 )
 
 target_include_directories(chennai_lang PRIVATE src)
 
-# ============================================================================
 # Custom target: Build Java Lexer
-# ============================================================================
-
-# Find Java compiler
 find_program(JAVAC javac)
 
 if(JAVAC)
@@ -45,12 +36,8 @@ if(JAVAC)
     # Make the main build depend on the Java lexer
     add_dependencies(chennai_lang java_lexer)
 else()
-    message(WARNING "javac not found — Java Lexer will not be built. "
-                    "The compiler will use the C++ lexer as fallback.")
+    message(FATAL_ERROR "javac not found. The Java Lexer is strictly required to build the Chennai Lang compiler.")
 endif()
 
-# ============================================================================
 # Installation
-# ============================================================================
-
 install(TARGETS chennai_lang DESTINATION bin)

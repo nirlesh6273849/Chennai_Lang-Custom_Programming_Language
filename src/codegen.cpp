@@ -2,27 +2,16 @@
 #include <cmath>
 #include <iostream>
 #include <stdexcept>
-
-// ============================================================================
-// Constructor
-// ============================================================================
-
+#include <cstdint>
+  // Constructor
 CodeGenerator::CodeGenerator()
     : labelCounter(0), stringCounter(0), currentFunction(nullptr),
       currentStackSize(0), inOverrideEval(false) {}
-
-// ============================================================================
-// Label management
-// ============================================================================
-
+  // Label management
 std::string CodeGenerator::newLabel(const std::string &prefix) {
   return ".L_" + prefix + "_" + std::to_string(labelCounter++);
 }
-
-// ============================================================================
-// String literal management
-// ============================================================================
-
+  // String literal management
 std::string CodeGenerator::addStringLiteral(const std::string &str) {
   auto it = stringLiterals.find(str);
   if (it != stringLiterals.end()) {
@@ -69,11 +58,7 @@ std::string CodeGenerator::addStringLiteral(const std::string &str) {
 
   return label;
 }
-
-// ============================================================================
-// Scope management
-// ============================================================================
-
+  // Scope management
 void CodeGenerator::pushScope() {
   Scope scope;
   if (scopes.empty()) {
@@ -114,11 +99,7 @@ CodeGenerator::VarInfo *CodeGenerator::lookupVar(const std::string &name) {
   }
   return nullptr;
 }
-
-// ============================================================================
-// Emission helpers
-// ============================================================================
-
+  // Emission helpers
 void CodeGenerator::emit(const std::string &line) {
   textSection << "    " << line << "\n";
 }
@@ -130,11 +111,7 @@ void CodeGenerator::emitLabel(const std::string &label) {
 void CodeGenerator::emitComment(const std::string &comment) {
   textSection << "    ; " << comment << "\n";
 }
-
-// ============================================================================
-// Top-level: generate full NASM assembly
-// ============================================================================
-
+  // Top-level: generate full NASM assembly
 std::string CodeGenerator::generate(const Program &program) {
   genProgram(program);
 
@@ -178,11 +155,7 @@ std::string CodeGenerator::generate(const Program &program) {
 
   return out.str();
 }
-
-// ============================================================================
-// Program generation
-// ============================================================================
-
+  // Program generation
 void CodeGenerator::genProgram(const Program &program) {
   // Register operator overloads
   for (auto &ov : program.operators) {
@@ -199,11 +172,7 @@ void CodeGenerator::genProgram(const Program &program) {
     genFunction(fn.get());
   }
 }
-
-// ============================================================================
-// Function generation
-// ============================================================================
-
+  // Function generation
 void CodeGenerator::genFunction(const FunctionDef *fn) {
   currentFunction = fn;
   currentStackSize = 0;
@@ -254,11 +223,7 @@ void CodeGenerator::genFunction(const FunctionDef *fn) {
 
   currentFunction = nullptr;
 }
-
-// ============================================================================
-// Block generation
-// ============================================================================
-
+  // Block generation
 void CodeGenerator::genBlock(const BlockStmt *block) {
   pushScope();
   for (auto &stmt : block->statements) {
@@ -266,11 +231,7 @@ void CodeGenerator::genBlock(const BlockStmt *block) {
   }
   popScope();
 }
-
-// ============================================================================
-// Statement dispatch
-// ============================================================================
-
+  // Statement dispatch
 void CodeGenerator::genStatement(const Stmt *stmt) {
   if (auto *s = dynamic_cast<const DeclarationStmt *>(stmt)) {
     genDeclaration(s);
@@ -294,22 +255,24 @@ void CodeGenerator::genStatement(const Stmt *stmt) {
     throw std::runtime_error("CodeGen: Unknown statement type");
   }
 }
-
-// ============================================================================
-// Declaration: int x;
-// ============================================================================
-
+  // Declaration: int x;
 void CodeGenerator::genDeclaration(const DeclarationStmt *stmt) {
   emitComment("declare " + stmt->typeName + " " + stmt->varName);
   VarInfo &var = declareVar(stmt->varName, stmt->typeName);
-  // Initialize to 0
-  emit("mov qword [rbp" + std::to_string(var.stackOffset) + "], 0");
+  
+  if (stmt->typeName.find("[]") != std::string::npos) {
+    emitComment("allocate array (100 elements * 8 bytes)");
+    emit("mov rcx, 800");
+    emit("sub rsp, 32"); // shadow space
+    emit("call malloc");
+    emit("add rsp, 32");
+    emit("mov qword [rbp" + std::to_string(var.stackOffset) + "], rax");
+  } else {
+    // Initialize to 0
+    emit("mov qword [rbp" + std::to_string(var.stackOffset) + "], 0");
+  }
 }
-
-// ============================================================================
-// Assignment: x = expr;
-// ============================================================================
-
+  // Assignment: x = expr;
 void CodeGenerator::genAssignment(const AssignmentStmt *stmt) {
   emitComment(stmt->varName + " = <expr>");
   genExpr(stmt->value.get());
@@ -319,11 +282,7 @@ void CodeGenerator::genAssignment(const AssignmentStmt *stmt) {
   }
   emit("mov [rbp" + std::to_string(var->stackOffset) + "], rax");
 }
-
-// ============================================================================
-// Array assignment: arr[idx] = expr;
-// ============================================================================
-
+  // Array assignment: arr[idx] = expr;
 void CodeGenerator::genArrayAssign(const ArrayAssignStmt *stmt) {
   emitComment(stmt->varName + "[idx] = <expr>");
 
@@ -348,22 +307,14 @@ void CodeGenerator::genArrayAssign(const ArrayAssignStmt *stmt) {
   // Store: [base + index * 8] = value
   emit("mov [rdx + rcx * 8], rax");
 }
-
-// ============================================================================
-// Declaration + Assignment: int x = expr;
-// ============================================================================
-
+  // Declaration + Assignment: int x = expr;
 void CodeGenerator::genDeclAssign(const DeclAssignStmt *stmt) {
   emitComment("declare+assign " + stmt->typeName + " " + stmt->varName);
   VarInfo &var = declareVar(stmt->varName, stmt->typeName);
   genExpr(stmt->value.get());
   emit("mov [rbp" + std::to_string(var.stackOffset) + "], rax");
 }
-
-// ============================================================================
-// If / elif / else
-// ============================================================================
-
+  // If / elif / else
 void CodeGenerator::genIf(const IfStmt *stmt) {
   std::string endLabel = newLabel("endif");
   std::string elseLabel = newLabel("else");
@@ -417,11 +368,7 @@ void CodeGenerator::genIf(const IfStmt *stmt) {
 
   emitLabel(endLabel);
 }
-
-// ============================================================================
-// While loop
-// ============================================================================
-
+  // While loop
 void CodeGenerator::genWhile(const WhileStmt *stmt) {
   std::string loopLabel = newLabel("while");
   std::string endLabel = newLabel("endwhile");
@@ -440,11 +387,7 @@ void CodeGenerator::genWhile(const WhileStmt *stmt) {
 
   emitLabel(endLabel);
 }
-
-// ============================================================================
-// Print (sollu)
-// ============================================================================
-
+  // Print (sollu)
 void CodeGenerator::genPrint(const PrintStmt *stmt) {
   emitComment("sollu (print)");
 
@@ -477,19 +420,11 @@ void CodeGenerator::genPrint(const PrintStmt *stmt) {
   emit("call printf");
   emit("add rsp, 32");
 }
-
-// ============================================================================
-// Expression statement (e.g. function call)
-// ============================================================================
-
+  // Expression statement (e.g. function call)
 void CodeGenerator::genExprStmt(const ExprStmt *stmt) {
   genExpr(stmt->expr.get());
 }
-
-// ============================================================================
-// Expression generation — result always in RAX
-// ============================================================================
-
+  // Expression generation — result always in RAX
 void CodeGenerator::genExpr(const Expr *expr) {
   if (auto *e = dynamic_cast<const NumberExpr *>(expr)) {
     emit("mov rax, " + std::to_string(e->value));
@@ -555,11 +490,7 @@ void CodeGenerator::genExpr(const Expr *expr) {
 
   throw std::runtime_error("CodeGen: Unknown expression type");
 }
-
-// ============================================================================
-// Binary expression
-// ============================================================================
-
+  // Binary expression
 void CodeGenerator::genBinary(const BinaryExpr *expr) {
   // Check for operator override (inline expansion)
   // Guard with inOverrideEval to prevent infinite recursion
@@ -699,11 +630,7 @@ void CodeGenerator::genBinary(const BinaryExpr *expr) {
     throw std::runtime_error("CodeGen: Unknown binary operator: " + expr->op);
   }
 }
-
-// ============================================================================
-// Unary expression
-// ============================================================================
-
+  // Unary expression
 void CodeGenerator::genUnary(const UnaryExpr *expr) {
   genExpr(expr->operand.get());
   if (expr->op == "-") {
@@ -716,11 +643,7 @@ void CodeGenerator::genUnary(const UnaryExpr *expr) {
     throw std::runtime_error("CodeGen: Unknown unary operator: " + expr->op);
   }
 }
-
-// ============================================================================
-// Function call
-// ============================================================================
-
+  // Function call
 void CodeGenerator::genCall(const CallExpr *expr) {
   emitComment("call " + expr->callee);
 
@@ -749,11 +672,7 @@ void CodeGenerator::genCall(const CallExpr *expr) {
     emit("add rsp, " + std::to_string(extraArgs * 8));
   }
 }
-
-// ============================================================================
-// Array access
-// ============================================================================
-
+  // Array access
 void CodeGenerator::genArrayAccess(const ArrayAccessExpr *expr) {
   emitComment("array access: " + expr->name + "[idx]");
 
@@ -769,11 +688,7 @@ void CodeGenerator::genArrayAccess(const ArrayAccessExpr *expr) {
   emit("mov rdx, [rbp" + std::to_string(var->stackOffset) + "]"); // base ptr
   emit("mov rax, [rdx + rcx * 8]");                                // load element
 }
-
-// ============================================================================
-// Type inference (simple heuristic for print formatting)
-// ============================================================================
-
+  // Type inference (simple heuristic for print formatting)
 std::string CodeGenerator::inferExprType(const Expr *expr) {
   if (dynamic_cast<const StringExpr *>(expr))
     return "string";

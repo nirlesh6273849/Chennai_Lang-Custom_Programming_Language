@@ -1,12 +1,8 @@
 #pragma once
-#include "lexer.h"
+#include "token.h"
 #include <string>
 #include <vector>
-
-// ============================================================================
-// Token JSON Reader — bridges Java Lexer output → C++ Token vector
-// ============================================================================
-
+  // Token JSON Reader — bridges Java Lexer output → C++ Token vector
 class TokenReader {
 public:
   // Read a JSON token array from a file and return C++ Token objects

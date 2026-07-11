@@ -1,6 +1,6 @@
 #pragma once
 #include "ast.h"
-#include "lexer.h"
+#include "token.h"
 #include <memory>
 #include <vector>
 
@@ -13,8 +13,7 @@ public:
 private:
   std::vector<Token> tokens;
   size_t pos;
-
-  // ── Helpers ─────────────────────────────────────────────────────────────
+  // Helpers
   const Token &current() const;
   const Token &peek() const;
   const Token &advance();
@@ -25,13 +24,11 @@ private:
 
   bool isTypeToken() const;
   std::string parseType();
-
-  // ── Top level ───────────────────────────────────────────────────────────
+  // Top level
   OperatorOverload parseOperatorOverload();
   ExprPtr parseOExpression(const std::string &op);
   std::unique_ptr<FunctionDef> parseFunction();
-
-  // ── Statement ───────────────────────────────────────────────────────────
+  // Statement
   std::unique_ptr<BlockStmt> parseBlock();
   std::unique_ptr<BlockStmt> parseIndentedBlock();
   StmtPtr parseStatement();
@@ -39,8 +36,7 @@ private:
   StmtPtr parseIfStatement();
   StmtPtr parseWhileStatement();
   StmtPtr parsePrintStatement();
-
-  // ── Expression (precedence climbing) ────────────────────────────────────
+  // Expression (precedence climbing)
   ExprPtr parseExpression();
   ExprPtr parseAssignmentExpr();
   ExprPtr parseLogicalExpr();
@@ -50,7 +46,6 @@ private:
   ExprPtr parseUnaryExpr();
   ExprPtr parsePrimary();
   ExprPtr parsePowerExpr();
-
-  // ── Argument list ───────────────────────────────────────────────────────
+  // Argument list
   std::vector<ExprPtr> parseArgumentList();
 };

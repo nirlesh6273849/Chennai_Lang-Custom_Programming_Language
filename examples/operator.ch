@@ -17,9 +17,9 @@ main() {
     int result;
     result = a + b;
 
-    "a = " + a sollu
-    "b = " + b sollu
-    "a + b (with override: LHS^2 + RHS) = " + result sollu
+    "a = ", a sollu
+    "b = ", b sollu
+    "a + b (with override: LHS^2 + RHS) = ", result sollu
 
     // Another example
     int c;
@@ -28,7 +28,7 @@ main() {
     d = 10;
     int result2;
     result2 = c + d;
-    "c + d (4^2 + 10) = " + result2 sollu
+    "c + d (4^2 + 10) = ", result2 sollu
 }
 
 niruthuanna
