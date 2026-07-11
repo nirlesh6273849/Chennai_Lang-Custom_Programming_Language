@@ -69,7 +69,7 @@ app.post(`${BASE_PATH}/api/run`, (req, res) => {
 
   const startTime = Date.now();
 
-  execFile(BINARY_PATH, [tempFile], { timeout: TIMEOUT_MS, maxBuffer: MAX_OUTPUT_BYTES }, (error, stdout, stderr) => {
+  execFile(BINARY_PATH, ['--interpret', tempFile], { timeout: TIMEOUT_MS, maxBuffer: MAX_OUTPUT_BYTES }, (error, stdout, stderr) => {
     // Clean up temp file
     try { fs.unlinkSync(tempFile); } catch (e) { /* ignore */ }
 
